@@ -1,0 +1,62 @@
+CVSL design for XOR gate
+
+* Importing required files
+.include models-180nm
+
+* Defining necessary parameters
+.param Trep1= 40n
+.param Trep2 = {Trep1/2.0}
+.param Trf = {Trep1/20.0}
+.param Tw1 = {Trep1/2.0 - Trf}
+.param Tw2 = {Trep2/2.0 - Trf}
+.param hival=1.6
+.param loval=0.2
+.param Wp = 1.91U
+.param Wn = 2*0.665U
+.param L = 0.18U
+
+* Generating pulses for A, Abar, B, Bbar
+V1 A 0 DC 0 PULSE({loval} {hival} {Tw1} {Trf} {Trf} {Tw1} {Trep1})
+V2 Abar 0 DC 0 PULSE({hival} {loval} {Tw1} {Trf} {Trf} {Tw1} {Trep1})
+V3 B 0 DC 0 PULSE({loval} {hival} {Tw2} {Trf} {Trf} {Tw2} {Trep2})
+V4 Bbar 0 DC 0 PULSE({hival} {loval} {Tw2} {Trf} {Trf} {Tw2} {Trep2})
+
+* Supply Voltage
+vdd supply 0 dc 1.8
+
+* PMOS transistors
+MP1 Out Outbar Supply Supply cmosp
++ L=L W=Wp AD = (2*L*Wp) AS = (2*L*Wp) PD = (2*(2*L+Wp)) PS = (2*(2*L+Wp))
+MP2 Outbar Out Supply Supply cmosp
++ L=L W=Wp AD = (2*L*Wp) AS = (2*L*Wp) PD = (2*(2*L+Wp)) PS = (2*(2*L+Wp))
+
+* Circuit for XOR logic
+MN1 Out A 1 1 cmosn
++ L=L W=Wn AD = (2*L*Wn) AS = (2*L*Wn) PD = (2*(2*L+Wn)) PS = (2*(2*L+Wn))
+MN2 Out Bbar 1 1 cmosn
++ L=L W=Wn AD = (2*L*Wn) AS = (2*L*Wn) PD = (2*(2*L+Wn)) PS = (2*(2*L+Wn))
+MN3 1 Abar 0 0 cmosn
++ L=L W=Wn AD = (2*L*Wn) AS = (2*L*Wn) PD = (2*(2*L+Wn)) PS = (2*(2*L+Wn))
+MN4 1 B 0 0 cmosn
++ L=L W=Wn AD = (2*L*Wn) AS = (2*L*Wn) PD = (2*(2*L+Wn)) PS = (2*(2*L+Wn))
+
+* Circuit for XNOR logic
+MN5 Outbar Abar 2 2 cmosn
++ L=L W=Wn AD = (2*L*Wn) AS = (2*L*Wn) PD = (2*(2*L+Wn)) PS = (2*(2*L+Wn))
+MN6 Outbar A 3 3 cmosn
++ L=L W=Wn AD = (2*L*Wn) AS = (2*L*Wn) PD = (2*(2*L+Wn)) PS = (2*(2*L+Wn))
+MN7 2 B 0 0 cmosn
++ L=L W=Wn AD = (2*L*Wn) AS = (2*L*Wn) PD = (2*(2*L+Wn)) PS = (2*(2*L+Wn))
+MN8 3 Bbar 0 0 cmosn
++ L=L W=Wn AD = (2*L*Wn) AS = (2*L*Wn) PD = (2*(2*L+Wn)) PS = (2*(2*L+Wn))
+
+* Performing transient analysis
+.tran 1pS {3*Trep1} 0nS
+.control
+run
+
+* Plotting input voltage waveforms
+plot V(A)+2 V(Abar)+2 V(B) V(Bbar) V(Out)-2 V(Outbar)-2
+
+.endc
+.end

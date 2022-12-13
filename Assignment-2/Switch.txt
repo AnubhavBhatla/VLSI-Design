@@ -1,0 +1,13 @@
+.subckt swmat In1 In2 In3 In4 con conbar Out1 Out2
+MN1 In1 con Out1 0 cmosn
++ L=0.18U W=0.24U AD = 86.4fF AS = 86.4fF PD = 1.2U PS = 1.2U
+MN2 In2 conbar Out1 0 cmosn
++ L=0.18U W=0.24U AD = 86.4fF AS = 86.4fF PD = 1.2U PS = 1.2U
+MN3 In3 con Out2 0 cmosn
++ L=0.18U W=0.24U AD = 86.4fF AS = 86.4fF PD = 1.2U PS = 1.2U
+MN4 In4 conbar Out2 0 cmosn
++ L=0.18U W=0.24U AD = 86.4fF AS = 86.4fF PD = 1.2U PS = 1.2U
+* Loads representing wiring capacitance
+C1 Out1 0 50fF
+C2 Out2 0 50fF
+.ends

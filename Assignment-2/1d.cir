@@ -1,0 +1,60 @@
+CPL design for XOR gate
+
+* Importing required files
+.include Switch.txt
+.include Inverter.txt
+.include models-180nm
+
+* Defining necessary parameters
+.param Trep1= 40n
+.param Trep2 = {Trep1/2.0}
+.param Trf = {Trep1/20.0}
+.param Tw1 = {Trep1/2.0 - Trf}
+.param Tw2 = {Trep2/2.0 - Trf}
+.param hival=1.6
+.param loval=0.2
+
+* Generating pulses for A, Abar, B, Bbar
+V1 A 0 DC 0 PULSE({loval} {hival} {Tw1} {Trf} {Trf} {Tw1} {Trep1})
+V2 Abar 0 DC 0 PULSE({hival} {loval} {Tw1} {Trf} {Trf} {Tw1} {Trep1})
+V3 B 0 DC 0 PULSE({loval} {hival} {Tw2} {Trf} {Trf} {Tw2} {Trep2})
+V4 Bbar 0 DC 0 PULSE({hival} {loval} {Tw2} {Trf} {Trf} {Tw2} {Trep2})
+
+* Supply Voltage
+vdd dummy 0 dc 1.8
+vdummy dummy supply dc 0 ac 0
+
+* Switch Matrix
+x1 B Bbar Bbar B A Abar Out1 Out2 swmat
+
+* Inverter for XOR
+x2 supply Out1 XOR inv
+
+* Inverter for XNOR
+x3 supply Out2 XNOR inv
+
+* Pull-up PMOS
+.param Wp = 4*0.24U
+.param L = 0.18U
+MP1 Out1 XOR Supply Supply cmosp
++ L=L W=Wp AD = (2*L*Wp) AS = (2*L*Wp) PD = (2*(2*L+Wp)) PS = (2*(2*L+Wp))
+MP2 Out2 XNOR Supply Supply cmosp
++ L=L W=Wp AD = (2*L*Wp) AS = (2*L*Wp) PD = (2*(2*L+Wp)) PS = (2*(2*L+Wp))
+
+*Load capacitors
+Cxor XOR 0 108f
+Cxnor XNOR 0 108f
+
+* Performing transient analysis
+.tran 1pS {3*Trep1} 0nS
+.control
+run
+
+* Plotting input voltage waveforms
+plot V(A)+2 V(Abar)+2 V(B) V(Bbar) V(Out1)-2 V(Out2)-2 V(XOR)-4 V(XNOR)-4
+plot i(vdummy)
+
+meas tran i_avg AVG i(vdummy)
+
+.endc
+.end

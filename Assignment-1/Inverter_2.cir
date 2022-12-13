@@ -1,0 +1,40 @@
+* Unit Inverter
+.subckt inv supply Inp Output
+* This subcircuit defines a CMOS inverter with equal n and p widths 
+
+.param Wp = 1.33U
+.param Wn = 0.47U
+.param L = 0.18U
+MP1 Output Inp Supply Supply cmosp
++ L=L W=Wp AD = (2*L*Wp) AS = (2*L*Wp) PD = (2*(2*L+Wp)) PS = (2*(2*L+Wp))
+MN1 Output Inp 0 0 cmosn
++ L=L W=Wn AD = (2*L*Wn) AS = (2*L*Wn) PD = (2*(2*L+Wn)) PS = (2*(2*L+Wn))
+.ends
+
+vdd supply 0 dc 1.8
+
+* Device under test
+x3 supply Ck dutout inv
+
+* Load Capacitor
+C3 dutout 0 0.05pF
+
+.include models-180nm
+
+*DC ANALYSIS with pulse inputs
+VCk Ck 0 DC 0 PULSE(0 1.8 0nS 20pS 20pS 4nS 8.0nS)
+.dc VCk 0 1.8 0.01
+
+.control
+run
+
+plot v(dutout) vs v(Ck)
+
+let derivout = deriv(v(dutout))
+meas dc ViL find v(Ck) when derivout = -1
+meas dc VoH find v(dutout) when derivout = -1
+meas dc ViH find v(Ck) when derivout = -1 rise = last
+meas dc VoL find v(dutout) when derivout = -1 rise = last
+
+.endc
+.end

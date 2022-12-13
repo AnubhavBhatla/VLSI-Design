@@ -1,0 +1,64 @@
+Delay of DUT
+
+* Importing required files
+.include Inverter.txt
+.include models-180nm
+
+* Defining necessary parameters
+.param Trep= 5n
+.param Trf = {Trep/20.0}
+.param Tw = {Trep/2.0 - Trf}
+.param hival=1.8
+.param loval=0.0
+
+* Generating pulse for Input
+Vpulse pgen 0 DC 0 PULSE({loval} {hival} {Tw} {Trf} {Trf} {Tw} {Trep})
+
+* Supply Voltage
+vdd supply 0 dc 1.8
+
+* Inverters for loading the input
+xin1 supply pgen temp1 inv
+xin2 supply temp1 dutin inv
+xin3 supply temp1 temp2 inv
+xin4 supply temp1 temp2 inv
+xin5 supply temp1 temp2 inv
+
+* Cin for loading the input
+Cin temp2 0 0.1p
+
+* DUT
+xdut supply dutin dutout inv
+
+* Inverters for test load
+xtest1 supply dutout temp3 inv
+*xtest2 supply dutout temp3 inv
+*xtest3 supply dutout temp3 inv
+*xtest4 supply dutout temp3 inv
+*xtest5 supply dutout temp3 inv
+*xtest6 supply dutout temp3 inv
+*xtest7 supply dutout temp3 inv
+*xtest8 supply dutout temp3 inv
+
+* Inverters for loading the output
+xload1 supply temp3 temp4 inv
+xload2 supply temp3 temp4 inv
+xload3 supply temp3 temp4 inv
+xload4 supply temp3 temp4 inv
+
+* Cout for loading the output
+Cout temp4 0 0.1p
+
+* Performing transient analysis
+.tran 1pS {3*Trep} 0nS
+.control
+run
+
+* Plotting voltage waveforms
+plot v(pgen)+2 v(dutin) v(dutout)
+
+meas tran invdelay1 TRIG v(dutin) VAL=0.9 RISE=2 TARG v(dutout) VAL=0.9 FALL=2
+meas tran invdelay2 TRIG v(dutin) VAL=0.9 FALL=2 TARG v(dutout) VAL=0.9 RISE=2
+
+.endc
+.end

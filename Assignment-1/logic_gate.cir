@@ -1,0 +1,46 @@
+* Logic Gate
+.subckt lg A B C Supply Output
+* This subcircuit defines a CMOS inverter with equal n and p widths 
+MPA Output A Supply Supply cmosp
++ L=0.18U W=1.91U AD = 0.6876P AS = 0.6876P PD = 4.54U PS = 4.54U 
+MPB 1 B Supply Supply cmosp
++ L=0.18U W=1.91U AD = 0.6876P AS = 0.6876P PD = 4.54U PS = 4.54U 
+MPC Output C 1 1 cmosp
++ L=0.18U W=1.91U AD = 0.6876P AS = 0.6876P PD = 4.54U PS = 4.54U 
+MNA Output A 2 2 cmosn
++ L=0.18U W=0.665U AD = 0.2394P AS = 0.2394P PD = 2.050U PS = 2.050U
+MNB 2 B 0 0 cmosn
++ L=0.18U W=0.665U AD = 0.2394P AS = 0.2394P PD = 2.050U PS = 2.050U
+MNC 2 C 0 0 cmosn
++ L=0.18U W=0.665U AD = 0.2394P AS = 0.2394P PD = 2.050U PS = 2.050U
+.ends
+
+vdd supply 0 dc 1.8
+
+va A 0 dc 1.8
+vb B 0 dc 1.8
+vc C 0 dc 0
+
+* Device under test
+x3 Ck B C supply dutout lg
+
+* Load Capacitor
+C3 dutout 0 0.05pF
+
+.include models-180nm
+
+*TRANSIENT ANALYSIS with pulse inputs
+VCk Ck 0 DC 0 PULSE(0 1.8 0nS 20pS 20pS 4nS 8.0nS)
+.tran 1pS 35nS 0nS
+
+.control
+run
+
+plot 4.0+V(Ck) V(dutout)
+meas tran inrise TRIG v(ck) VAL=0.18 RISE=2 TARG v(Ck) VAL=1.62 RISE=2
+meas tran infall TRIG v(ck) VAL=1.62 FALL=2 TARG v(Ck) VAL=0.18 FALL=2
+meas tran drise TRIG v(dutout) VAL=0.18 RISE=2 TARG v(dutout) VAL=1.62 RISE=2
+meas tran dfall TRIG v(dutout) VAL=1.62 FALL=2 TARG v(dutout) VAL=0.18 FALL=2
+
+.endc
+.end
